@@ -1,0 +1,98 @@
+@import 'src/scss/variables';
+@import 'src/scss/p-upload';
+@import 'src/scss/p-carousel';
+
+:host ::ng-deep {
+  .p-datepicker-calendar {
+    * {
+      text-align: center;
+    }
+  }
+
+  .p-tabmenu .p-tabmenu-nav .p-tabmenuitem {
+    font-size: 16px;
+
+    @media screen and (max-width: $md) {
+      flex: 1 1 auto;
+    }
+  }
+
+  .p-paginator {
+    padding: 0.5rem 0rem;
+  }
+}
+
+
+:host ::ng-deep {
+  .p-datatable {
+    font-size: unset;
+  }
+
+  .info-table-col {
+    width: 150px;
+  }
+
+  .p-datatable.p-datatable-striped .p-datatable-tbody > tr:nth-child(even) {
+    background: #ebebeb;
+  }
+
+  .p-accordion .p-accordion-header:not(.p-disabled) .p-accordion-header-link:focus  {
+    box-shadow: none;
+  }
+
+  @media (max-width: $md){
+    .p-datatable .p-datatable-tbody > tr {
+      position: relative;
+    }
+
+    .p-datatable .p-datatable-tbody > tr> td:first-child {
+      padding-right: 2.5rem !important;
+    }
+
+    .p-datatable .p-datatable-tbody > tr> td:last-child {
+      padding-bottom: 0.5rem !important;
+    }
+
+    .p-datatable .p-datatable-tbody > tr > td {
+      padding-top: 0.5rem;
+      padding-bottom: 0;
+      padding-left: 0.5rem;
+      padding-right: 0.5rem;
+    }
+
+    .p-column-title {
+      display: block !important;
+      font-size: 1rem;
+      padding-bottom: 0 !important;
+    }
+
+    @for $i from 0 to 2 {
+      .btn-float-info:nth-child(#{$i + 1}) {
+        width: 35px;
+        position: absolute;
+        right: 0.75rem + $i*2.5rem;
+        top: 0.75rem;
+        padding: 4px !important;
+        line-height: 1;
+      }
+    }
+
+    .label {
+      line-height: .5;
+    }
+  }
+}
+
+textarea {
+  height: 150px;
+}
+
+.btn-submit {
+  background-color: rgb(33, 150, 243);
+  color: white;
+
+  @media screen and (max-width: $md) {
+    display: block;
+    width: 100%;
+  }
+}

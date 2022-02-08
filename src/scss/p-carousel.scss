@@ -1,0 +1,21 @@
+@import 'src/scss/variables';
+
+:host ::ng-deep {
+  .p-carousel-items-container {
+    text-align: center;
+  }
+
+  .p-carousel-item {
+    width: 100%;
+
+    img {
+      width: 258px;
+    }
+
+    @media screen and (max-width: $sm) {
+      img {
+        width: 100%;
+      }
+    }
+  }
+}

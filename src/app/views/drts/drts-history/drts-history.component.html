@@ -1,0 +1,207 @@
+<div class="component-container animated fadeIn">
+  <h1>DRTS 班次查詢</h1>
+
+
+  <p-tabMenu [model]="menuItems" [activeItem]="activeItem" class="mb-2">
+  </p-tabMenu>
+
+
+  <div class="card">
+    <p-table [responsive]="true" responsiveLayout="stack" styleClass="p-datatable-striped" [autoLayout]="true"
+      [paginator]="true" [rows]="10" [pageLinks]="0" [showJumpToPageDropdown]="true" (onPage)="pageChange()"
+      [value]="recordList" class="animated fadeIn">
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th>狀態</th>
+                <th>發車時間</th>
+                <th>路線名稱</th>
+                <th>本趟金額</th>
+                <th></th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-record let-columns="columns" let-i="rowIndex">
+            <tr>
+                <td [ngClass]="{'text-danger' : record.Shift.Status=='未執行', 'text-success': record.Shift.Status=='完成', 'text-primary': record.Shift.Status=='執行中'}">{{record.Shift.Status}}</td>
+                <td><span class="p-column-title">發車時間</span>{{record.Shift.DepartTime}}</td>
+                <td><span class="p-column-title">路線名稱</span>{{record.Shift.RouteName}}-{{record.Shift.RouteType}}</td>
+                <td><span class="p-column-title">本趟金額</span>
+                  現金:{{shiftAmountList[i]?.cash}}
+                  悠遊卡:{{shiftAmountList[i]?.easycard}}
+                  一卡通:{{shiftAmountList[i]?.ipass}}
+                </td>
+                <td class="info-table-col">
+                  <button class="btn btn-ghost-dark btn-block d-none d-md-block" (click)="showDetail(record)">
+                    <i class="fa fa-lg fa-info-circle"></i>
+                  </button>
+                </td>
+                <button class="btn btn-dark btn-info d-md-none" (click)="showDetail(record)">
+                  <i class="fa fa-info-circle"></i>
+                </button>
+            </tr>
+        </ng-template>
+    </p-table>
+  </div>
+
+
+
+</div>
+
+<p-toast styleClass="custom-toast" position="top-right" key="toast"></p-toast>
+<ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true"><p style="color: white" > Loading... </p></ngx-spinner>
+
+
+
+
+
+
+
+
+
+
+<!-- Button trigger modal -->
+<!-- <button type="button" class="btn btn-secondary mr-1" data-toggle="modal" (click)="detailModal.show()">
+  Launch demo modal
+</button> -->
+
+<div bsModal #detailModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" [config]="{backdrop: 'static',  keyboard: false}">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div *ngIf="selectedRecord" class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">詳細資訊</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="hideDetail()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="row">
+          <div class="col label">狀態</div>
+          <div class="col-md col-12 text-truncate">{{selectedRecord.Shift.Status}}</div>
+        </div>
+
+        <div class="row">
+          <div class="col label">路線名稱</div>
+          <div class="col-md col-12 text-truncate">{{selectedRecord.Shift.RouteName}}-{{selectedRecord.Shift.RouteType}}</div>
+        </div>
+
+        <div class="row">
+          <div class="col label">發車時間</div>
+          <div class="col-md col-12 text-truncate">{{selectedRecord.Shift.DepartTime || '無'}}</div>
+        </div>
+
+        <div class="row">
+          <div class="col label">執行時間</div>
+          <div class="col-md col-12 text-truncate">{{selectedRecord.Shift.ExecutionTime || '無'}}</div>
+        </div>
+
+        <div class="row">
+          <div class="col label">實際發車</div>
+          <div class="col-md col-12 text-truncate">{{selectedRecord.Shift.ActualDepartTime || '無'}}</div>
+        </div>
+
+        <div class="row">
+          <div class="col label">完成時間</div>
+          <div class="col-md col-12 text-truncate">{{selectedRecord.Shift.CompleteTime || '無'}}</div>
+        </div>
+
+
+
+
+
+        <p-accordion class="mt-2 mb-2" [multiple]="true">
+          <p-accordionTab header="站點明細: {{selectedRecord.Shift.StopList?.length || 0}}站" [(selected)]="activeState[0]">
+
+            <div *ngFor="let stop of selectedRecord.Shift.StopList">
+              <div class="row">
+                <div class="col label">站名</div>
+                <div class="col-md col-12 text-truncate">
+                  {{stop.Sequence}}. {{stop.Name}}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col label">地址</div>
+                <div class="col-md col-12 text-truncate">
+                  {{stop.Address}}
+                </div>
+              </div>
+              <hr>
+            </div>
+
+          </p-accordionTab>
+          <p-accordionTab header="執行動作明細: {{selectedRecord.ActionList?.length || 0}}筆" [(selected)]="activeState[1]">
+
+            <div *ngFor="let action of selectedRecord.ActionList; let i = index">
+              <p class="font-weight-bold text-dark">動作({{i + 1}})：{{action.Action}}</p>
+              <div class="row">
+                <div class="col label">時間</div>
+                <div class="col-md col-12 text-truncate">
+                  {{action.ActionTime}}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col label">站點</div>
+                <div class="col-md col-12 text-truncate">
+                  {{action.StopName}}
+                </div>
+              </div>
+              <hr>
+            </div>
+
+          </p-accordionTab>
+          <p-accordionTab header="乘客訂單明細: {{selectedRecord.OrderList?.length || 0}}張" [(selected)]="activeState[2]">
+
+            <div *ngFor="let order of selectedRecord.OrderList; let i = index">
+              <p class="font-weight-bold text-dark">
+                訂單({{i + 1}})：{{order.OrderType}}
+                <span class="text-danger" *ngIf="order.PickupTime == ''">(未上車)</span>
+              </p>
+
+              <div class="row" *ngIf="order.PickupTime != ''">
+                <div class="col label">上車時間</div>
+                <div class="col-md col-12 text-truncate">
+                  {{order.PickupTime}}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col label">上車站點</div>
+                <div class="col-md col-12 text-truncate">
+                  {{order.PickupStopName}}
+                </div>
+              </div>
+              <div class="row" *ngIf="order.DropTime != ''">
+                <div class="col label">下車時間</div>
+                <div class="col-md col-12 text-truncate">
+                  {{order.DropTime}}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col label">下車站點</div>
+                <div class="col-md col-12 text-truncate">
+                  {{order.DropStopName}}
+                </div>
+              </div>
+              <div class="row" *ngIf="order.PickupTime != ''">
+                <div class="col label">付款方式</div>
+                <div class="col-md col-12 text-truncate">
+                  {{order.PayType}}
+                  <span *ngIf="order.CardType">({{order.CardType}})</span>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col label">金額</div>
+                <div class="col-md col-12 text-truncate">
+                  {{order.Amount}} 元
+                </div>
+              </div>
+              <hr>
+            </div>
+
+          </p-accordionTab>
+        </p-accordion>
+
+      </div>
+
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

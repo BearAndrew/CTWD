@@ -1,0 +1,359 @@
+<div class="component-container animated fadeIn">
+  <div class="container">
+    <div *ngIf="!showStopPage && nowStop">
+      <div class="color-block bg-green">
+        <div class="d-flex">
+          <div class="color-block-icon"><i class="fa fa-long-arrow-up"></i></div>
+          <div class="color-block-header">
+            <h1 class="mb-0">{{nowStop.Name}}</h1>
+            <p>{{nowStop.EnName}}</p>
+          </div>
+        </div>
+        <div class="color-block-body">
+          <span>前往</span> {{nowStop.Address}}
+        </div>
+      </div>
+      <p>抵達時間: {{departTime | date: 'HH:mm'}}</p>
+      <p>距離: {{distance * 1000 | number: '1.0-0'}} 公尺</p>
+
+      <p-accordion class="mt-2 mb-2">
+        <p-accordionTab header="預約名單: {{reservationPassengerCount || 0}}位">
+          <div *ngFor="let order of drtsOrderList">
+            <div *ngIf="order.OrderType == '預約'">
+              <div class="badge mb-2" [ngClass]="order.PickupTime == '' ? 'badge-secondary' : 'badge-primary'">
+                {{order.PickupTime == '' ? '待執行' : '搭乘中'}}
+              </div>
+
+              <div class="row">
+                <div class="col label">預約乘客</div>
+                <div class="col-md col-12 text-truncate">{{order.Name}} {{order.Gender == '男' ? '先生' : '小姐'}}</div>
+              </div>
+              <div class="row">
+                <div class="col label">上車地點</div>
+                <div class="col-md col-12 text-truncate">{{order.PickupStopName}}</div>
+              </div>
+              <div class="row">
+                <div class="col label">下車地點</div>
+                <div class="col-md col-12 text-truncate">{{order.DropStopName}}</div>
+              </div>
+              <hr>
+            </div>
+          </div>
+        </p-accordionTab>
+      </p-accordion>
+    </div>
+
+
+
+    <div *ngIf="showStopPage">
+      <div class="color-block bg-stop">
+        <div class="color-block-header">
+          <p>{{currentSequence < drtsShift.LastSequence ? '本站' : '終點站'}}: {{nowStop.Name}}</p>
+          <p *ngIf="currentSequence < drtsShift.LastSequence">下站: {{nextStop.Name}}</p>
+        </div>
+      </div>
+
+      <div *ngIf="(currentSequence < drtsShift.LastSequence)" class="color-block bg-pickup">
+        <p>上車人數</p>
+        <div class="relative mb-3">
+          <span class="v-center pl-2">男</span>
+          <p-selectButton class="passengerCount" [options]="maleCountOptions" [(ngModel)]="selectedMaleCount"
+            (ngModelChange)="pickupCountChange(true)" optionLabel="value"></p-selectButton>
+        </div>
+        <div class="relative mb-3">
+          <span class="v-center pl-2">女</span>
+          <p-selectButton class="passengerCount" [options]="femaleCountOptions" [(ngModel)]="selectedFemaleCount"
+            (ngModelChange)="pickupCountChange(false)" optionLabel="value"></p-selectButton>
+        </div>
+        <button class="btn btn-primary btn-block" (click)="createOrder()">乘客上車</button>
+      </div>
+
+      <hr>
+
+      <p>車上乘客: {{currentPassengerCount}}人 (預約: {{drtsOrderList.length - currentPassengerCount}}人)</p>
+      <div *ngFor="let drtsOrder of drtsOrderList; let i = index;" [@simpleFadeAnimation]="'in'">
+        <div class="card mb-3" [ngClass]="drtsOrder.OrderType == '即時' ? '' : 'card-yellow' "
+          *ngIf="drtsOrder.PickupStopSequence <= currentSequence">
+        <div class="card-header">
+          <span class="badge badge-lg" [ngClass]="drtsOrder.OrderType == '即時' ? 'badge-secondary' : 'badge-warning' ">
+            {{drtsOrder.OrderType}}</span>
+          <span class="float-right">
+            <span *ngIf="drtsOrder.OrderType == '預約'">{{drtsOrder.Name}}</span>
+            {{drtsOrder.Gender == '男' ? '先生' : '小姐'}}
+          </span>
+        </div>
+
+        <div class="card-body">
+          <div class="row">
+            <div class="col-12">上車站: {{drtsOrder.PickupStopName}}</div>
+            <div class="col-12" *ngIf="drtsOrder.PickupTime">上車時間: {{drtsOrder.PickupTime | date: 'HH:mm'}}</div>
+          </div>
+
+          <div class="row" *ngIf="drtsOrder.OrderType == '預約'">
+            <div class="col-12">下車站: {{drtsOrder.DropStopName}}</div>
+          </div>
+
+
+
+
+
+          <div *ngIf="(drtsOrder.OrderType == '預約' && drtsOrder.DropStopName == nowStop.Name)
+          || (drtsOrder.OrderType == '即時' && drtsOrder.PickupStopName != nowStop.Name)">
+            <div class="row mt-2">
+              <div class="col mb-2">付款方式</div>
+              <div class="col-12">
+                <p-selectButton [options]="payTypeList" optionLabel="Name" (onChange)="selectPayType(i)"
+                [(ngModel)]="selectedPayTypeList[i]"></p-selectButton>
+              </div>
+            </div>
+            <div class="row mt-2" *ngIf="payTypeList[payTypeList.indexOf(selectedPayTypeList[i])]?.CardTypeList.length > 0">
+              <div class="col mb-2">卡片種類</div>
+              <div class="col-12">
+                <p-selectButton [options]="payTypeList[payTypeList.indexOf(selectedPayTypeList[i])].CardTypeList" optionLabel="Name"
+                [(ngModel)]="selectedCardTypeList[i]" (onChange)="selectCardType(i)"></p-selectButton>
+              </div>
+            </div>
+            <div class="row mt-2" *ngIf="amountOptionsList[i]?.length > 0">
+              <div class="col mb-2">金額</div>
+              <div class="col-12">
+                <p-selectButton [options]="amountOptionsList[i]" [(ngModel)]="selectedAmountList[i]" optionLabel="value"></p-selectButton>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <div class="row" *ngIf="drtsOrder.PickupTime != ''">
+            <div class="col pl-2 pr-2" *ngIf="drtsOrder.OrderType == '即時'">
+              <button class="btn btn-danger btn-block" (click)="orderConfrim(drtsOrder, '刪除')">刪除</button>
+            </div>
+            <div class="col pl-2 pr-2" *ngIf="(drtsOrder.OrderType == '預約' && drtsOrder.DropStopName == nowStop.Name)
+             || (drtsOrder.OrderType == '即時' && drtsOrder.PickupStopName != nowStop.Name)">
+              <button class="btn btn-success btn-block" (click)="orderConfrim(drtsOrder, '完成')">下車</button>
+            </div>
+          </div>
+
+          <div class="row" *ngIf="drtsOrder.PickupTime == ''">
+            <div class="col-6 pl-2 pr-2">
+              <button class="btn btn-danger btn-block" (click)="orderConfrim(drtsOrder, '未見')">未見</button>
+            </div>
+            <div class="col-6 pl-2 pr-2">
+              <button class="btn btn-primary btn-block" (click)="orderConfrim(drtsOrder, '上車')">上車</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container d-n-flex">
+    <div class="row">
+      <div class="col pr-0">
+        <button class="btn btn-warning btn-block btn-bottom shadow" (click)="reportModal.show()">
+          <span>回報</span>
+        </button>
+      </div>
+
+      <div class="col">
+        <button *ngIf="!showStopPage" class="btn btn-primary btn-block btn-bottom shadow" (click)="confirmModal.show()">
+          到站
+        </button>
+        <div *ngIf="showStopPage">
+          <button class="btn btn-primary btn-block btn-bottom shadow" (click)="confirmModal.show()">
+            <span *ngIf="currentSequence == drtsShift.DepartSequence">開始任務</span>
+            <span *ngIf="currentSequence != drtsShift.DepartSequence && currentSequence < drtsShift.LastSequence">離站</span>
+            <span *ngIf="currentSequence == drtsShift.LastSequence">完成任務</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+<p-toast styleClass="custom-toast" position="top-right" key="toast"></p-toast>
+<ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true"><p style="color: white" > Loading... </p></ngx-spinner>
+
+<agm-map (mapReady)="onMapReady($event)"></agm-map>
+
+
+
+<!-- Button trigger modal -->
+<!-- <button type="button" class="btn btn-secondary mr-1" data-toggle="modal" (click)="confirmModal.show()">
+  Launch demo modal
+</button> -->
+
+<!-- 開始完成到站離站 再次確認視窗 -->
+<div bsModal #confirmModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="confirmModal" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content" *ngIf="drtsShift">
+      <div class="modal-header">
+        <h4 class="modal-title">提示</h4>
+      </div>
+
+      <div class="modal-body">
+        <div *ngIf="!showStopPage">
+          確認到站
+        </div>
+
+
+        <div *ngIf="showStopPage">
+          <div *ngIf="pickupPassengerCount == 0">
+            <span *ngIf="currentSequence == drtsShift.DepartSequence">確認開始任務?</span>
+            <span *ngIf="currentSequence != drtsShift.DepartSequence && currentSequence < drtsShift.LastSequence && dropPassengerCount == 0">確認離站?</span>
+            <span *ngIf="currentSequence == drtsShift.LastSequence && drtsOrderList.length == 0">確認完成任務?</span>
+            <span *ngIf="currentSequence != drtsShift.LastSequence && dropPassengerCount > 0">尚有預約乘客未下車!</span>
+            <span *ngIf="currentSequence == drtsShift.LastSequence && drtsOrderList.length > 0">尚有乘客未下車!</span>
+          </div>
+          <span *ngIf="pickupPassengerCount > 0">尚有預約乘客未執行!</span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="row">
+          <div class="col">
+            <button class="btn btn-block btn-secondary" (click)="confirmModal.hide();">
+              <span *ngIf="!(showStopPage && currentSequence == drtsShift.LastSequence && drtsOrderList.length > 0 || pickupPassengerCount > 0 || dropPassengerCount > 0)">取消</span>
+              <span *ngIf="(showStopPage && currentSequence == drtsShift.LastSequence && drtsOrderList.length > 0 || pickupPassengerCount > 0 || dropPassengerCount > 0)">確定</span>
+            </button>
+          </div>
+          <div class="col pl-0" *ngIf="!showStopPage">
+            <button class="btn btn-block btn-primary" (click)="arriveStop()">
+              到站
+            </button>
+          </div>
+          <div class="col pl-0" *ngIf="showStopPage && !((currentSequence == drtsShift.LastSequence && drtsOrderList.length > 0) || pickupPassengerCount > 0 || dropPassengerCount > 0)">
+            <button class="btn btn-block btn-primary" (click)="leaveStop()">
+              <span *ngIf="currentSequence == drtsShift.DepartSequence">開始任務</span>
+              <span *ngIf="currentSequence != drtsShift.DepartSequence && currentSequence < drtsShift.LastSequence">離站</span>
+              <span *ngIf="currentSequence == drtsShift.LastSequence">完成任務</span>
+            </button>
+          </div>
+          <!-- currentSequence: {{currentSequence}} , drtsShift.LastSequence: {{drtsShift.LastSequence}} -->
+        </div>
+      </div>
+
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+
+
+
+
+<!-- 上.下車與未見.刪除 再次確認視窗 -->
+<div bsModal #orderConfirmModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="orderConfirmModal" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content" *ngIf="drtsShift">
+      <div class="modal-header">
+        <h4 class="modal-title">提示</h4>
+      </div>
+
+      <div class="modal-body">
+        <div *ngIf="undonePayType.length > 0">
+          請選擇
+          <span *ngFor="let undoneItem of undonePayType; let last = last;">
+            {{undoneItem}}
+            <span *ngIf="!last">、</span>
+          </span>
+        </div>
+        <span *ngIf="orderConfirmAction == '完成' && undonePayType.length === 0">確定要下車?</span>
+        <span *ngIf="orderConfirmAction == '刪除' || orderConfirmAction == '未見'">確認要刪除?</span>
+        <span *ngIf="orderConfirmAction == '上車'">確認要上車?</span>
+      </div>
+
+      <div class="modal-footer">
+        <div class="row">
+          <div class="col">
+            <button class="btn btn-block btn-secondary" (click)="orderConfirmModal.hide();">
+              <span *ngIf="undonePayType.length === 0">取消</span>
+              <span *ngIf="undonePayType.length > 0">確定</span>
+            </button>
+          </div>
+          <div class="col pl-0" *ngIf="undonePayType.length === 0">
+            <button *ngIf="orderConfirmAction == '上車'" class="btn btn-block btn-primary" (click)="rsvDRTSOrderPickup(confirmOrder)">
+              上車
+            </button>
+            <button *ngIf="orderConfirmAction == '未見'" class="btn btn-block btn-danger" (click)="rsvDRTSOrderNoShow(confirmOrder)">
+              未見
+            </button>
+            <button *ngIf="orderConfirmAction == '完成'" class="btn btn-block btn-success" (click)="closeOrder(confirmOrder)">
+              下車
+            </button>
+            <button *ngIf="orderConfirmAction == '刪除'" class="btn btn-block btn-danger" (click)="deleteOrder(confirmOrder)">
+              刪除
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+
+
+
+<!-- 回報問題視窗 -->
+<div bsModal #reportModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="reportModal"
+  aria-hidden="true" [config]="{backdrop: 'static',  keyboard: false}">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">回報問題</h4>
+      </div>
+
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-12">
+            <p-dropdown [options]="canMsgOptions" [(ngModel)]="canMsg" (ngModelChange)="setCanMsg($event)" optionLabel="value"
+            placeholder="選擇罐頭訊息" autoWidth="false" [style]="{'width':'100%', 'top': '-2px'}"></p-dropdown>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12">描述</div>
+          <div class="col-12">
+            <textarea class="w-100" pInputTextarea [(ngModel)]="reportIssueRequest.Description "></textarea>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12">照片上傳
+            <span *ngIf="reportIssueRequest.Base64PhotoList?.length > 0">
+              (已選擇{{reportIssueRequest.Base64PhotoList.length}}張)
+            </span>
+          </div>
+          <div class="col-12">
+            <p-fileUpload #reportFU multiple="multiple" accept="image/*" [showUploadButton]="false" customUpload="true"
+              (onClear)="reportClear()" (onRemove)="reportChange()" (onSelect)="reportChange()">
+            </p-fileUpload>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="row">
+          <div class="col">
+            <button class="btn btn-block btn-secondary" (click)="closeReportModal();">
+              取消
+            </button>
+          </div>
+          <div class="col pl-0">
+            <button class="btn btn-block btn-primary" (click)="reportDRTSIssue()">
+              送出
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

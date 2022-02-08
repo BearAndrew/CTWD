@@ -1,0 +1,22 @@
+:host ::ng-deep {
+  .p-calendar {
+    width: calc(100% - 85px);
+    height: 50px;
+  }
+
+  .p-calendar .p-inputtext {
+    width: calc(100% - 85px);
+    height: 50px;
+    font-size: 1.5rem;
+
+    @media (max-width: $md) {
+      height: 38px;
+    }
+  }
+
+  .p-datepicker-calendar {
+    * {
+      text-align: center;
+    }
+  }
+}

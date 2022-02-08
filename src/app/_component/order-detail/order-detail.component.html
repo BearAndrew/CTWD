@@ -1,0 +1,166 @@
+<div *ngIf="selectedOrder">
+
+  <div class="row">
+    <div class="col label">預約時間</div>
+    <div class="col-md col-12 text-truncate">{{selectedOrder.ReservationTime | date: 'yyyy/MM/dd HH:mm'}}</div>
+  </div>
+
+  <div class="row">
+    <div class="col label">上車地點</div>
+    <div class="col-md col-12 text-truncate">{{selectedOrder.PUAddress}}</div>
+  </div>
+
+  <div class="row">
+    <div class="col label">上車備註</div>
+    <div class="col-md col-12 text-truncate">{{selectedOrder.PUMemo || '無'}}</div>
+  </div>
+
+  <div class="row">
+    <div class="col label">下車地點</div>
+    <div class="col-md col-12 text-truncate">{{selectedOrder.DPAddress}}</div>
+  </div>
+
+  <div class="row">
+    <div class="col label">下車備註</div>
+    <div class="col-md col-12 text-truncate">{{selectedOrder.DPMemo || '無'}}</div>
+  </div>
+
+  <div class="row">
+    <div class="col label">乘客數</div>
+    <div class="col-md col-12 text-truncate">{{selectedOrder.SeatRequired || '無'}}</div>
+  </div>
+
+  <div class="row">
+    <div class="col label">乘客姓名</div>
+    <div class="col-md col-12 text-truncate">
+      <span *ngIf="parent !== 'reservation'">
+        {{selectedOrder.LastName}}{{selectedOrder.FirstName}}
+        {{selectedOrder.Gender == '男' ? '先生' : '小姐'}}
+      </span>
+      <span *ngIf="parent == 'reservation'">
+        ***
+      </span>
+    </div>
+  </div>
+
+  <div *ngIf="parent !== 'history' && !selectedOrder.IsNegotiatedTaxiFee" class="row">
+    <div class="col label">預估車資</div>
+    <div class="col-md col-12 text-truncate">{{selectedOrder.EstTaxiFee}}元</div>
+  </div>
+
+  <div *ngIf="selectedOrder.IsNegotiatedTaxiFee" class="row">
+    <div class="col label">議價車資</div>
+    <div class="col-md col-12 text-truncate">{{selectedOrder.NegotiatedTaxiFee}}元</div>
+  </div>
+
+  <div *ngIf="parent == 'history'" class="row">
+    <div class="col label">實收車資</div>
+    <div class="col-md col-12 text-truncate">{{selectedOrder.ActTaxiFee}}元</div>
+  </div>
+
+  <!-- 任務流程時間 -->
+  <ng-container *ngIf="parent == 'history'" id="time-group">
+
+    <!-- 取消 -->
+    <ng-container *ngIf="selectedOrder.CancelTime">
+      <div class="row">
+        <div class="col label">取消時間</div>
+        <div class="col-md col-12 text-truncate">
+          <span *ngIf="selectedOrder.CancelTime">{{managerService.StringToDate(selectedOrder.CancelTime)| date: 'yyyy/MM/dd HH:mm'}}</span>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- 已完成 -->
+    <ng-container *ngIf="!selectedOrder.CancelTime">
+      <div class="row">
+        <div class="col label">執行時間</div>
+        <div class="col-md col-12 text-truncate">
+          <span *ngIf="selectedOrder.ExecutionTime">{{managerService.StringToDate(selectedOrder.ExecutionTime)| date: 'yyyy/MM/dd HH:mm'}}</span>
+          <span *ngIf="!selectedOrder.ExecutionTime">無</span>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col label">抵達時間</div>
+        <div class="col-md col-12 text-truncate">
+          <span *ngIf="selectedOrder.ArriveTime">{{managerService.StringToDate(selectedOrder.ArriveTime)| date: 'yyyy/MM/dd HH:mm'}}</span>
+          <span *ngIf="!selectedOrder.ArriveTime">無</span>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col label">上車時間</div>
+        <div class="col-md col-12 text-truncate">
+          <span *ngIf="selectedOrder.PickupTime">{{managerService.StringToDate(selectedOrder.PickupTime)| date: 'yyyy/MM/dd HH:mm'}}</span>
+          <span *ngIf="!selectedOrder.PickupTime">無</span>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col label">下車時間</div>
+        <div class="col-md col-12 text-truncate">
+          <span *ngIf="selectedOrder.DropTime">{{managerService.StringToDate(selectedOrder.DropTime)| date: 'yyyy/MM/dd HH:mm'}}</span>
+          <span *ngIf="!selectedOrder.DropTime">無</span>
+        </div>
+      </div>
+    </ng-container>
+
+  </ng-container>
+
+
+
+  <div class="mt-2 mb-2">
+    <p-panel header="服務項目" [toggleable]="true" [collapsed]="collapsed" (onAfterToggle)="collapsed = $event.collapsed">
+
+      <div *ngIf="selectedOrder.DemandObject.accompanyNeed" class="row">
+        <div class="col label">醫療陪伴</div>
+        <div class="col-md col-12 text-truncate">
+          {{selectedOrder.DemandObject.accompany}} 小時
+        </div>
+      </div>
+
+      <div *ngIf="selectedOrder.DemandObject.machineNeed">
+        <div class="row">
+          <div class="col"> <h2>爬梯機</h2> </div>
+        </div>
+
+        <div class="row">
+          <div class="col label">乘客體重</div>
+          <div class="col-md col-12 text-truncate">{{selectedOrder.DemandObject.machineUserkg}}公斤</div>
+        </div>
+
+        <div class="row">
+          <div class="col label">身體移動</div>
+          <div class="col-md col-12 text-truncate">{{selectedOrder.DemandObject.machineUsermove}}</div>
+        </div>
+
+        <div class="row">
+          <div class="col label">身體狀態</div>
+          <div class="col-md col-12 text-truncate">{{selectedOrder.DemandObject.machineUserfit}}</div>
+        </div>
+
+        <div class="row">
+          <div class="col label">使用樓層</div>
+          <div class="col-md col-12 text-truncate">{{selectedOrder.DemandObject.stairs}}</div>
+        </div>
+
+        <div class="row">
+          <div class="col label">樓梯寬度</div>
+          <div class="col-md col-12 text-truncate">
+            <span *ngIf="selectedOrder.DemandObject.stairW == '有'">95公分以上</span>
+            <span *ngIf="selectedOrder.DemandObject.stairW == '無'">95公分以下</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="row">
+        <div class="col label">備註</div>
+        <div class="col-md col-12 text-truncate" [ngClass]="{'text-danger': selectedOrder.DemandObject.memo}">{{selectedOrder.DemandObject.memo || '無'}}</div>
+      </div>
+
+    </p-panel>
+  </div>
+
+</div>

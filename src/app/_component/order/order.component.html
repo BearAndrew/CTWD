@@ -1,0 +1,283 @@
+<div (window:resize)="onResize()">
+
+  <div class="row">
+    <div *ngFor="let order of orderList
+      | filterBy: { PUAddress: search?.puAddress, DPAddress: search?.dPAddress, ReservationTimeString: search?.date?.value }
+      | paginate: { itemsPerPage: itemsPerPage, currentPage: p }; let i = index;"
+      class="col-md-6 col-xl-4">
+
+      <div class="card" [ngClass]="order.pick ? 'border-info' : ''">
+
+        <div class="card-header">
+          <span *ngIf="parent != 'reservation'" class="badge" [ngStyle]="managerService?.StatusStyle(order.Status)">{{order.Status}}</span>
+          <span class="badge badge-lg badge-secondary">{{order.DemandObject.class}}</span>
+
+          <div class="float-right">
+            <!-- 預約選取按鈕 -->
+            <span *ngIf="parent == 'reservation'" class="hover badge badge-lg mr-2" [ngClass]="order.pick ? 'badge-danger' : 'badge-info' "
+              (click)="pickReservationOrder(order)">
+              <i *ngIf="order.pick" class="fa fa-minus"> 移除</i>
+              <i *ngIf="!order.pick" class="fa fa-plus"> 選取</i>
+            </span>
+
+            <!-- 詳細內容按鈕 -->
+            <span class="span-click" (click)="showDetail(order, false)">
+              <i class="fa fa-search text-primary"></i>
+            </span>
+          </div>
+
+        </div>
+
+        <div class="card-body">
+          <div *ngIf="parent != 'history'" class="row">
+            <div *ngIf="order.SeatRequired" class="col text-truncate text-danger">乘客數需求{{order.SeatRequired}}人</div>
+          </div>
+
+          <div class="row">
+            <div class="col label">預約時間</div>
+            <div class="col-md col-12 text-truncate" pTooltip="{{order.ReservationTimeString}}"
+            tooltipPosition="top" tooltipZIndex="9999">{{order.ReservationTimeString}}</div>
+          </div>
+
+          <div class="row">
+            <div class="col label">上車地點</div>
+            <div class="col-md col-12 text-truncate" pTooltip="{{order.PUAddress}}"
+            tooltipPosition="top" tooltipZIndex="9999">{{order.PUAddress}}</div>
+          </div>
+
+          <div class="row">
+            <div class="col label">下車地點</div>
+            <div class="col-md col-12 text-truncate" pTooltip="{{order.DPAddress}}"
+            tooltipPosition="bottom" tooltipZIndex="9999">{{order.DPAddress}}</div>
+          </div>
+
+        </div>
+
+        <div *ngIf="parent == 'dashboard'" class="card-footer">
+          <div class="row">
+            <div *ngIf="order.RestTime.hour >= -1" class="col rest-time-text pr-0">
+              <span *ngIf="order.RestTime.hour < 0" class="text-danger">
+                超過{{order.RestTime.hour*-1 - 1}}時{{61 - order.RestTime.min}}分
+              </span>
+              <span *ngIf="order.RestTime.hour >= 0">
+                剩餘<span *ngIf="order.RestTime.hour > 0">{{order.RestTime.hour }}時</span>{{order.RestTime.min}}分
+              </span>
+            </div>
+
+            <div *ngIf="order.RestTime.hour < -1" class="col rest-time-text text-danger pr-0">已過期</div>
+            <div *ngIf="(order.RestTime.hour == 0 && order.RestTime.min < 40) || (order.RestTime.hour == -1)" class="col btn-execute pl-0">
+              <button class="btn btn-primary btn-block" (click)="showDetail(order, true)">
+                執行
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div><!--/.col-->
+  </div><!--/.row-->
+
+
+</div>
+
+
+
+
+<!-- Button trigger modal -->
+<!-- <button type="button" class="btn btn-secondary mr-1" data-toggle="modal" (click)="detailModal.show()">
+  Launch demo modal
+</button> -->
+
+<div bsModal #detailModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 *ngIf="!isExecuteReady" class="modal-title">詳細資訊</h4>
+        <h4 *ngIf="isExecuteReady" class="modal-title">預約執行確認</h4>
+
+        <button type="button" class="close pull-right" aria-label="Close" (click)="detailModal.hide(); isExecuteReady = false;">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div *ngIf="selectedOrder" class="modal-body">
+
+        <app-order-detail [parent]="parent" [selectedOrder]="selectedOrder"></app-order-detail>
+
+      </div>
+
+      <div *ngIf="isExecuteReady" class="modal-footer">
+        <div class="row">
+          <div class="col pr-0">
+            <button class="btn btn-block btn-secondary" (click)="detailModal.hide(); isExecuteReady = false;">取消</button>
+          </div>
+          <div class="col">
+            <button class="btn btn-block btn-primary" (click)="executeOrder(selectedOrder);detailModal.hide()">執行</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<!-- <div>
+
+  <div class="row">
+    <div class="col label">預約時間</div>
+    <div class="col-md col-12 text-truncate">{{selectedOrder.ReservationTime | date: 'yyyy/MM/dd HH:mm'}}</div>
+  </div>
+
+  <div class="row">
+    <div class="col label">上車地點</div>
+    <div class="col-md col-12 text-truncate">{{selectedOrder.PUAddress}}</div>
+  </div>
+
+  <div class="row">
+    <div class="col label">上車備註</div>
+    <div class="col-md col-12 text-truncate">{{selectedOrder.PUMemo || '無'}}</div>
+  </div>
+
+  <div class="row">
+    <div class="col label">下車地點</div>
+    <div class="col-md col-12 text-truncate">{{selectedOrder.DPAddress}}</div>
+  </div>
+
+  <div class="row">
+    <div class="col label">下車備註</div>
+    <div class="col-md col-12 text-truncate">{{selectedOrder.DPMemo || '無'}}</div>
+  </div>
+
+  <div class="row">
+    <div class="col label">乘客姓名</div>
+    <div class="col-md col-12 text-truncate">
+      <span *ngIf="parent !== 'reservation'">
+        {{selectedOrder.LastName}}{{selectedOrder.FirstName}}
+        {{selectedOrder.Gender == '男' ? '先生' : '小姐'}}
+      </span>
+      <span *ngIf="parent == 'reservation'">
+        ***
+      </span>
+    </div>
+  </div>
+
+  <div *ngIf="parent !== 'history' && !selectedOrder.IsNegotiatedTaxiFee" class="row">
+    <div class="col label">預估車資</div>
+    <div class="col-md col-12 text-truncate">{{selectedOrder.EstTaxiFee}}元</div>
+  </div>
+
+  <div *ngIf="selectedOrder.IsNegotiatedTaxiFee" class="row">
+    <div class="col label">議價車資</div>
+    <div class="col-md col-12 text-truncate">{{selectedOrder.NegotiatedTaxiFee}}元</div>
+  </div>
+
+  <div *ngIf="parent == 'history'" class="row">
+    <div class="col label">實收車資</div>
+    <div class="col-md col-12 text-truncate">{{selectedOrder.ActTaxiFee}}元</div>
+  </div>
+
+
+  <ng-container *ngIf="parent == 'history'" id="time-group">
+
+    <ng-container *ngIf="selectedOrder.CancelTime">
+      <div class="row">
+        <div class="col label">取消時間</div>
+        <div class="col-md col-12 text-truncate">
+          <span *ngIf="selectedOrder.CancelTime">{{managerService.StringToDate(selectedOrder.CancelTime)| date: 'yyyy/MM/dd HH:mm'}}</span>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="!selectedOrder.CancelTime">
+      <div class="row">
+        <div class="col label">執行時間</div>
+        <div class="col-md col-12 text-truncate">
+          <span *ngIf="selectedOrder.ExecutionTime">{{managerService.StringToDate(selectedOrder.ExecutionTime)| date: 'yyyy/MM/dd HH:mm'}}</span>
+          <span *ngIf="!selectedOrder.ExecutionTime">無</span>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col label">抵達時間</div>
+        <div class="col-md col-12 text-truncate">
+          <span *ngIf="selectedOrder.ArriveTime">{{managerService.StringToDate(selectedOrder.ArriveTime)| date: 'yyyy/MM/dd HH:mm'}}</span>
+          <span *ngIf="!selectedOrder.ArriveTime">無</span>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col label">上車時間</div>
+        <div class="col-md col-12 text-truncate">
+          <span *ngIf="selectedOrder.PickupTime">{{managerService.StringToDate(selectedOrder.PickupTime)| date: 'yyyy/MM/dd HH:mm'}}</span>
+          <span *ngIf="!selectedOrder.PickupTime">無</span>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col label">下車時間</div>
+        <div class="col-md col-12 text-truncate">
+          <span *ngIf="selectedOrder.DropTime">{{managerService.StringToDate(selectedOrder.DropTime)| date: 'yyyy/MM/dd HH:mm'}}</span>
+          <span *ngIf="!selectedOrder.DropTime">無</span>
+        </div>
+      </div>
+    </ng-container>
+
+  </ng-container>
+
+
+
+  <div class="mt-2 mb-2">
+    <p-panel header="服務項目" [toggleable]="true" [collapsed]="collapsed" (onAfterToggle)="collapsed = $event.collapsed">
+
+      <div *ngIf="selectedOrder.DemandObject.accompanyNeed" class="row">
+        <div class="col label">醫療陪伴</div>
+        <div class="col-md col-12 text-truncate">
+          {{selectedOrder.DemandObject.accompany}} 小時
+        </div>
+      </div>
+
+      <div *ngIf="selectedOrder.DemandObject.machineNeed">
+        <div class="row">
+          <div class="col"> <h2>爬梯機</h2> </div>
+        </div>
+
+        <div class="row">
+          <div class="col label">乘客體重</div>
+          <div class="col-md col-12 text-truncate">{{selectedOrder.DemandObject.machineUserkg}}公斤</div>
+        </div>
+
+        <div class="row">
+          <div class="col label">身體移動</div>
+          <div class="col-md col-12 text-truncate">{{selectedOrder.DemandObject.machineUsermove}}</div>
+        </div>
+
+        <div class="row">
+          <div class="col label">身體狀態</div>
+          <div class="col-md col-12 text-truncate">{{selectedOrder.DemandObject.machineUserfit}}</div>
+        </div>
+
+        <div class="row">
+          <div class="col label">使用樓層</div>
+          <div class="col-md col-12 text-truncate">{{selectedOrder.DemandObject.stairs}}</div>
+        </div>
+
+        <div class="row">
+          <div class="col label">樓梯寬度</div>
+          <div class="col-md col-12 text-truncate">
+            <span *ngIf="selectedOrder.DemandObject.stairW == '有'">95公分以上</span>
+            <span *ngIf="selectedOrder.DemandObject.stairW == '無'">95公分以下</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="row">
+        <div class="col label">備註</div>
+        <div class="col-md col-12 text-truncate" [ngClass]="{'text-danger': selectedOrder.DemandObject.memo}">{{selectedOrder.DemandObject.memo || '無'}}</div>
+      </div>
+
+    </p-panel>
+  </div>
+
+</div> -->

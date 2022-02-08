@@ -1,0 +1,24 @@
+.p-toast {
+  z-index: 5000 !important;
+}
+
+@media screen and (max-width: 768px) {
+  .custom-toast .p-toast-message {
+    width: 80vw;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .p-toast-bottom-center {
+    -webkit-transform: translate(-40vw, 0);
+            transform: translate(-40vw, 0);
+    margin-left: 0;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .p-toast-top-right {
+    left: calc(110vw - 100%);
+  }
+}
+/*# sourceMappingURL=p-toast.css.map */

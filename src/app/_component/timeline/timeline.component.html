@@ -1,0 +1,12 @@
+<div class="timeline">
+  <span class="title">{{date}} 行程表</span>
+  <div class="parent">
+    <div class="line-group">
+      <div *ngFor="let e of [].constructor(5); let i = index" class="line">
+        <span>{{(i) * 6}}</span>
+      </div>
+    </div>
+
+    <div *ngFor="let i of intervalList" class="child" [ngStyle]="i"></div>
+  </div>
+</div>

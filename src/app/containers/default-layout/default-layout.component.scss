@@ -1,0 +1,47 @@
+@import "./src/scss/variables";
+:host ::ng-deep {
+  @import "./src/scss/pagination.scss";
+
+  .app-header .navbar-brand {
+    @media (max-width: $md) {
+      display: none;
+    }
+  }
+}
+
+.container-fluid {
+  margin-top: 30px;
+  height: calc(100% - 60px);
+  @media (max-width: $md) {
+    height: calc(100% - 30px);
+  }
+}
+
+.text-nav {
+  color: #73818f;
+  font-size: 20px !important;
+}
+
+.name {
+  @media (max-width: $md) {
+    margin-left: 10px;
+  }
+}
+
+.nav-btn {
+  position: relative;
+  padding-right: 16px;
+  font-size: 16px;
+  color: #73818f;
+  cursor: pointer;
+
+  .nav-badge {
+    position: absolute;
+    top: -5px;
+    right: 5px;
+  }
+}
+
+app-footer {
+  font-size: 16px;
+}

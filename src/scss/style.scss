@@ -1,0 +1,16 @@
+// If you want to override variables do it here
+@import "variables";
+
+// Import styles
+@import "~@coreui/coreui/scss/coreui";
+
+// If you want to add something do it here
+@import "custom";
+@import "p-accordion";
+@import "p-calendar";
+@import "p-carousel";
+@import "p-toast";
+@import "p-table";
+@import "p-upload";
+@import "pagination";
+@import "modal";

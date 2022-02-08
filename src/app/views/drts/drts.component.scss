@@ -1,0 +1,29 @@
+@import "./src/scss/variables";
+
+@media (max-width: $md){
+  $mobilePadding: .75rem;
+
+  .card {
+    margin-bottom: $mobilePadding;
+
+    * {
+      line-height: 1;
+    }
+    .card-body {
+      padding: $mobilePadding;
+      font-size: $fontSize * 1.5;
+    }
+    .card-footer {
+      padding: $mobilePadding;
+      color: gray;
+    }
+
+    .text-truncate {
+      margin-bottom: 0.75rem;
+    }
+  }
+}
+
+.text-darkblue {
+  color: darkblue;
+}

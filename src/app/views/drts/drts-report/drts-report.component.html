@@ -1,0 +1,249 @@
+<div class="component-container animated fadeIn" (window:resize)="onResize()">
+  <h1>DRTS 司機回報</h1>
+
+  <p-tabMenu [model]="menuItems" [activeItem]="activeItem" class="mb-2">
+  </p-tabMenu>
+
+
+  <!-- 回報頁面 -->
+  <div *ngIf="menuIndex == 0" class="animated fadeIn">
+    <div class="card">
+      <div class="card-body">
+        <div class="row">
+          <span class="pl-3">回報種類</span>
+          <div class="col">
+            <p-dropdown [options]="reportTypeOption" [(ngModel)]="reportType" optionLabel="value"
+              placeholder="選擇種類" autoWidth="false" [style]="{'width':'100%', 'max-width': '200px', 'top': '-2px'}"></p-dropdown>
+          </div>
+        </div>
+
+        <!-- 汽車維修 -->
+        <div *ngIf="reportType?.value == '汽車維修'">
+          <div class="row">
+            <span class="pl-3">維修日期</span>
+            <div class="col">
+              <p-calendar [(ngModel)]="maintRequest.MaintDate" [touchUI]="isMobile" [readonlyInput]="true"
+                dateFormat="yy/mm/dd" [placeholder]="'選取日期'">
+              </p-calendar>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12">備註</div>
+            <div class="col-12">
+              <textarea class="w-100" pInputTextarea [(ngModel)]="maintRequest.Memo"></textarea>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12">照片上傳
+              <span *ngIf="maintRequest.Base64PhotoList?.length > 0">
+                (已選擇{{maintRequest.Base64PhotoList.length}}張)
+              </span>
+            </div>
+            <div class="col-12">
+              <p-fileUpload #maintFU multiple="multiple" accept="image/*" [showUploadButton]="false" customUpload="true"
+                (onClear)="maintClear()" (onRemove)="maintChange($event)" (onSelect)="maintChange($event)">
+              </p-fileUpload>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 體檢 -->
+        <div *ngIf="reportType?.value == '體檢'">
+          <div class="row">
+            <span class="pl-3">體檢年份</span>
+            <div class="col">
+              <p-calendar [(ngModel)]="physDate" (ngModelChange)="dateChange()" [touchUI]="isMobile" [readonlyInput]="true"
+                dateFormat="yy" [placeholder]="'選取日期'">
+              </p-calendar>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12">備註</div>
+            <div class="col-12">
+              <textarea class="w-100" pInputTextarea [(ngModel)]="physExamRequest.Memo"></textarea>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12">照片上傳
+              <span *ngIf="physExamRequest.Base64PhotoList?.length > 0">
+                (已選擇{{physExamRequest.Base64PhotoList.length}}張)
+              </span>
+            </div>
+            <div class="col-12">
+              <p-fileUpload #physFU multiple="multiple" accept="image/*" [showUploadButton]="false" customUpload="true"
+                (onClear)="physClear()" (onRemove)="physChange($event)" (onSelect)="physChange($event)">
+              </p-fileUpload>
+            </div>
+          </div>
+
+        </div>
+
+
+      </div>
+
+      <div *ngIf="reportType" class="card-footer">
+        <button *ngIf="reportType.value=='汽車維修'" class="btn btn-submit float-right" (click)="reportDRTSMaint()">送出</button>
+        <button *ngIf="reportType.value=='體檢'" class="btn btn-submit float-right" (click)="reportDRTSPhysExam()">送出</button>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <!-- 查詢頁面 -->
+  <div *ngIf="menuIndex == 1" class="animated fadeIn">
+    <div class="card">
+      <div class="card-body">
+        <div class="row">
+          <span class="pl-3">篩選種類</span>
+          <div class="col">
+            <p-dropdown [options]="searchTypeOption" [(ngModel)]="searchType" (ngModelChange)="pageReset()" optionLabel="value" [showClear]="true"
+              placeholder="選擇種類" autoWidth="false" [style]="{'width':'100%', 'max-width': '200px', 'top': '-2px'}"></p-dropdown>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <div class="card">
+      <p-table [responsive]="true" responsiveLayout="stack" styleClass="p-datatable-striped" [autoLayout]="true"
+        [paginator]="true" [rows]="10" [pageLinks]="0" [showJumpToPageDropdown]="true" [(first)]="pageNum" (onPage)="pageChange()"
+        [value]="reportRecordList | filterBy: { Type: searchType?.value }">
+          <ng-template pTemplate="header" let-columns>
+              <tr>
+                  <th>處理狀況</th>
+                  <th>回報種類</th>
+                  <th>回報時間</th>
+                  <th></th>
+              </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-record let-columns="columns">
+              <tr>
+                  <td><span *ngIf="record.IsHandle" class="text-success">已處理</span>
+                    <span *ngIf="!record.IsHandle" class="text-danger">未處理</span></td>
+                  <td><span class="p-column-title">回報種類</span>{{record.Type}}</td>
+                  <td><span class="p-column-title">回報時間</span>{{record.ReportTime}}</td>
+
+                  <td class="info-table-col">
+                    <button class="btn btn-ghost-dark d-none d-md-inline" (click)="showDetail(record)">
+                      <i class="fa fa-lg fa-info-circle"></i>
+                    </button>
+                    <button *ngIf="record.HasPhoto" class="btn btn-ghost-dark d-none d-md-inline" (click)="loadDDRTSPhoto(record.ID, record.Type)">
+                      <i class="fa fa-photo"></i>
+                    </button>
+                  </td>
+
+                  <div class="btn-float-group">
+                    <button class="btn btn-dark d-md-none btn-float-info" (click)="showDetail(record)">
+                      <i class="fa fa-info-circle"></i>
+                    </button>
+                    <button *ngIf="record.HasPhoto" class="btn btn-dark d-md-none btn-float-info" (click)="loadDDRTSPhoto(record.ID, record.Type)">
+                      <i class="fa fa-photo"></i>
+                    </button>
+                  </div>
+              </tr>
+          </ng-template>
+      </p-table>
+    </div>
+  </div>
+
+</div>
+
+
+
+
+
+<p-toast styleClass="custom-toast" position="top-right" key="toast"></p-toast>
+<ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true"><p style="color: white" > Loading... </p></ngx-spinner>
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Button trigger modal -->
+<!-- <button type="button" class="btn btn-secondary mr-1" data-toggle="modal" (click)="detailModal.show()">
+  Launch demo modal
+</button> -->
+
+<div bsModal #detailModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" [config]="{backdrop: 'static',  keyboard: false}">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div *ngIf="selectedRecord" class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">詳細資訊</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="hideDetail()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="row">
+          <div class="col label">回報種類</div>
+          <div class="col-md col-12 text-truncate">{{selectedRecord.Type}}</div>
+        </div>
+
+        <div class="row">
+          <div class="col label">回報時間</div>
+          <div class="col-md col-12 text-truncate">{{selectedRecord.ReportTime}}</div>
+        </div>
+
+        <div class="row" *ngIf="selectedRecord.Type !== '狀況回報'">
+          <div class="col label">司機備註</div>
+          <div class="col-md col-12 text-truncate">{{selectedRecord.DriverMemo || '無'}}</div>
+        </div>
+
+        <div class="row" *ngIf="selectedRecord.Type == '狀況回報'">
+          <div class="col label">狀況描述</div>
+          <div class="col-md col-12 text-truncate">{{selectedRecord.Description || '無'}}</div>
+        </div>
+
+        <div class="row">
+          <div class="col label">管理備註</div>
+          <div class="col-md col-12 text-truncate">{{selectedRecord.AdminMemo || '無'}}</div>
+        </div>
+
+      </div>
+
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+
+
+
+<div bsModal #photoModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" [config]="{backdrop: 'static',  keyboard: false}">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div *ngIf="showPhotoList" class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">檢視照片 共{{showPhotoList.length}}張</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="photoModal.hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p-carousel [value]="showPhotoList" [numVisible]="1" [numScroll]="1">
+          <ng-template let-showPhoto pTemplate="item">
+            <img src="data:image/png;base64,{{showPhoto}}"/>
+          </ng-template>
+        </p-carousel>
+      </div>
+
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

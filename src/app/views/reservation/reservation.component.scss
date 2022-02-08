@@ -1,0 +1,77 @@
+@import "./src/scss/variables";
+
+.info {
+  font-size: .875rem;
+}
+
+.btn-calendar-search {
+  position: relative;
+  top: -3px;
+  left: 5px;
+  width: 75px;
+  text-align: center;
+
+  @media (max-width: $md) {
+    line-height: 1;
+  }
+}
+
+.pagination {
+  position: relative;
+
+  button {
+    position: absolute;
+    right: 0px;
+    width: 120px;
+
+    .badge {
+      margin-left: 8px;
+      top: -1.5px;
+    }
+  }
+}
+
+.btn-float {
+  background-color:#3794ff;
+
+  .fa {
+    color: white;
+  }
+
+  .badge {
+    position: absolute;
+    top: 0px;
+    font-size: 1rem;
+  }
+}
+
+:host ::ng-deep .ngx-pagination {
+  margin-top: 4px;
+}
+
+:host ::ng-deep .p-datepicker-calendar {
+  * {
+    text-align: center;
+  }
+}
+
+:host ::ng-deep .p-calendar {
+  width: calc(100% - 85px);
+  height: 50px;
+}
+
+:host ::ng-deep .p-calendar .p-inputtext {
+  width: calc(100% - 85px);
+  height: 50px;
+  font-size: 20px;
+
+  @media (max-width: $md) {
+    height: 38px;
+  }
+}
+
+.calendar {
+  @media (max-width: $md) {
+    height: 38px;
+  }
+}

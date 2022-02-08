@@ -1,0 +1,112 @@
+<div class="component-container animated fadeIn">
+
+  <div class="relative">
+    <h1 class="mb-rwd">DRTS主控台</h1>
+    <button class="btn btn-primary btn-refresh" (click)="myDRTSShiftList()">刷新</button>
+  </div>
+
+  <h2 class="mb-4 text-center">
+    <span class="text-success">已完成 {{completeCount}} 趟 </span>
+    <span class="text-danger">未完成 {{unfinishedCount}} 趟</span>
+  </h2>
+
+  <div *ngIf="drtsShiftList?.length == 0">
+    <h2>尚無任務!!</h2>
+  </div>
+
+  <div *ngIf="drtsShiftList?.length > 0" class="drtsShift-container" (window:resize)="onResize()">
+    <div class="row">
+      <div *ngFor="let drtsShift of drtsShiftList | paginate: { itemsPerPage: itemsPerPage, currentPage: p }"
+        class="col-md-6 col-xl-4">
+
+        <div class="card">
+
+          <div class="card-body">
+
+            <div class="row mb-1">
+              <div class="col" [ngClass]="drtsShift.RestTime?.hour > -1 ? '': 'text-danger'">預約時間 {{drtsShift.DepartTime | date:'HH:mm'}}</div>
+            </div>
+
+            <div class="row">
+              <div class="col">{{drtsShift.RouteName}} - {{drtsShift.RouteType}}</div>
+            </div>
+
+          </div>
+
+          <div class="card-footer" *ngIf="drtsShift.RestTime">
+            <div class="row">
+              <div *ngIf="drtsShift.RestTime.hour >= -1" class="col rest-time-text pr-0 align-self-center">
+                <span *ngIf="drtsShift.RestTime.hour < 0" class="text-danger">
+                  超過{{drtsShift.RestTime.hour*-1 - 1}}時{{61 - drtsShift.RestTime.min}}分
+                </span>
+                <span *ngIf="drtsShift.RestTime.hour >= 0">
+                  剩餘<span *ngIf="drtsShift.RestTime.hour > 0">{{drtsShift.RestTime.hour }}時</span>{{drtsShift.RestTime.min}}分
+                </span>
+              </div>
+
+              <div *ngIf="drtsShift.RestTime.hour < -1" class="col rest-time-text text-danger pr-0">已過期</div>
+              <div *ngIf="(drtsShift.RestTime.hour == 0 && drtsShift.RestTime.min < 30) || drtsShift.RestTime.hour == -1" class="col btn-execute pl-0">
+                <button class="btn btn-primary btn-block" (click)="showDetail(drtsShift); detailModal.show()">
+                  執行
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div><!--/.col-->
+    </div><!--/.row-->
+  </div>
+
+  <div *ngIf="drtsShiftList && drtsShiftList?.length !== 0" class="pagination">
+    <pagination-controls (pageChange)="pageChanged($event)"
+    previousLabel="" nextLabel=""></pagination-controls>
+  </div>
+
+</div>
+
+<p-toast styleClass="custom-toast" position="top-right" key="toast"></p-toast>
+
+<ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true"><p style="color: white" > Loading... </p></ngx-spinner>
+
+
+
+
+
+
+<!-- Button trigger modal -->
+<!-- <button type="button" class="btn btn-secondary mr-1" data-toggle="modal" (click)="detailModal.show()">
+  Launch demo modal
+</button> -->
+
+<div bsModal #detailModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div *ngIf="executedDrtsShift" class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">執行確認</h4>
+      </div>
+
+      <div class="modal-body">
+        <div class="row mb-1">
+          <div class="col">預約時間 {{executedDrtsShift.DepartTime | date:'HH:mm'}}</div>
+        </div>
+
+        <div class="row">
+          <div class="col">{{executedDrtsShift.RouteName}} - {{executedDrtsShift.RouteType}}</div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="row">
+          <div class="col pr-0">
+            <button class="btn btn-block btn-secondary" (click)="detailModal.hide();">取消</button>
+          </div>
+          <div class="col">
+            <button class="btn btn-block btn-primary" (click)="executeDRTSShift(executedDrtsShift.ID);detailModal.hide()">執行</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

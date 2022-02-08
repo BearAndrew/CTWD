@@ -1,0 +1,208 @@
+<div *ngIf="order" class="no-padding animated fadeIn" (window:resize)="mapResize()">
+
+  <div #infoPanel class="container" id="info-panel">
+
+    <div class="row">
+      <div class="col text-truncate">
+        {{order.ReservationTime | date: 'MM/dd HH:mm'}}
+        {{order.LastName}}{{order.FirstName}}
+        {{order.Gender == '男' ? '先生' : '小姐'}}
+      </div>
+
+      <div class="float-right pr-3">
+        <!-- 詳細內容按鈕 -->
+        <span class="span-click" (click)="detailModal.show()">
+          <i class="fa fa-search text-primary"></i>
+        </span>
+      </div>
+    </div>
+
+    <div *ngIf="order.StatusCode <= 2" class="row">
+      <div class="col text-truncate">地點:{{order.PUAddress}}</div>
+    </div>
+
+    <div *ngIf="order.StatusCode == 3" class="row">
+      <div class="col text-truncate">地點:{{order.DPAddress}}</div>
+    </div>
+
+  </div>
+
+  <agm-map [style.height.px]="mapHeight" [fitBounds]="fitBounds" [disableDefaultUI]="true" (mapReady)="onMapReady($event)">
+    <agm-marker *ngIf="order.StatusCode <= 2" [latitude]="order.PULat" [longitude]="order.PULng" [label]="puLabelOptions" [agmFitBounds]="true"></agm-marker>
+    <agm-marker *ngIf="order.StatusCode > 2" [latitude]="order.DPLat" [longitude]="order.DPLng" [label]="dpLabelOptions" [agmFitBounds]="true"></agm-marker>
+    <agm-marker [latitude]="current.pos.lat" [longitude]="current.pos.lng" [agmFitBounds]="true" [iconUrl]="current.icon"></agm-marker>
+
+    <agm-direction *ngIf="dirDst" [origin]="current.pos" [destination]="dirDst" [renderOptions]="renderOptions"
+      [markerOptions]="markerOptions" [optimizeWaypoints]="false"></agm-direction>
+  </agm-map>
+
+  <div class="container" id="btn-panel">
+    <div class="row">
+      <div class="col pr-0">
+        <button class="btn btn-danger btn-block" (click)="issueModal.show()">回報</button>
+      </div>
+
+      <div class="col pr-0">
+        <button class="btn btn-warning btn-block" (click)="drawDirection()">
+          <span *ngIf="!dirDst">導航</span>
+          <span *ngIf="dirDst">刷新</span>
+        </button>
+      </div>
+
+      <div class="col">
+        <button class="btn btn-primary btn-block" (click)="(order.StatusCode == 3) ? dropModal.show() : checkDist()">
+          <div>
+            <span *ngIf="order.StatusCode == 1">抵達</span>
+            <span *ngIf="order.StatusCode == 2">上車</span>
+            <span *ngIf="order.StatusCode == 3">下車</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+<p-toast styleClass="custom-toast" position="top-right" key="toast"></p-toast>
+
+<ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true"><p style="color: white" > Loading... </p></ngx-spinner>
+
+
+
+
+<!-- Button trigger modal -->
+<!-- <button type="button" class="btn btn-secondary mr-1" data-toggle="modal" (click)="issueModal.show()">
+  Launch demo modal
+</button> -->
+
+<!-- 回報問題 -->
+<div bsModal #issueModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">回報問題</h4>
+      </div>
+      <div class="modal-body">
+
+        <p>
+          <p-dropdown [options]="issueTypeList" [(ngModel)]="issueType" optionLabel="name" optionValue="name"
+           placeholder="選擇問題" autoWidth="false" [style]="{'width':'100%'}"></p-dropdown>
+        </p>
+
+        <label>備註:</label>
+        <textarea type="text" [(ngModel)]="memo" class="form-control"></textarea>
+
+      </div>
+      <div class="modal-footer">
+        <div class="row">
+          <div class="col pr-0">
+            <button type="button" class="btn btn-block btn-secondary" (click)="issueModal.hide()">取消</button>
+          </div>
+          <div class="col">
+            <button type="button" class="btn btn-block btn-primary" (click)="reportIssue();issueModal.hide()" [disabled]="!issueType?.name">確定</button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<!-- 超過距離提示訊息 -->
+<div bsModal #checkDistModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="checkDistModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">提示訊息</h4>
+      </div>
+      <div class="modal-body">
+
+        <p *ngIf="order">
+          距離<!--
+          --><span *ngIf="order.StatusCode === 1 ||order.StatusCode === 2">上車</span><!--
+          --><span *ngIf="order.StatusCode === 3">下車</span>
+          地點超過300公尺，確定要
+          <span *ngIf="order.StatusCode === 1">抵達</span><!--
+          --><span *ngIf="order.StatusCode === 2">上車</span><!--
+          --><span *ngIf="order.StatusCode === 3">下車</span>
+          ？
+        </p>
+
+      </div>
+      <div class="modal-footer">
+        <div class="row">
+          <div class="col pr-0">
+            <button type="button" class="btn btn-block btn-secondary" (click)="checkDistModal.hide()">取消</button>
+          </div>
+          <div class="col">
+            <button type="button" class="btn btn-block btn-primary" (click)="changeStatusCode(); checkDistModal.hide()">確定</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<!-- 下車提示訊息 -->
+<div bsModal #dropModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content" *ngIf="order">
+      <div class="modal-header">
+        <h4 class="modal-title">提示訊息</h4>
+      </div>
+      <div class="modal-body">
+
+        <label><span *ngIf="order.IsNegotiatedTaxiFee">議價</span>車資:</label>
+        <input *ngIf="!order.IsNegotiatedTaxiFee" [(ngModel)]="taxiFee" type="number" class="form-control taxi-fee-input" placeholder="輸入車資" required>
+        <input *ngIf="order.IsNegotiatedTaxiFee" [(ngModel)]="taxiFee" type="number" class="form-control taxi-fee-input" placeholder="輸入議價車資" required>
+        <p *ngIf="order.IsNegotiatedTaxiFee" class="text-danger mt-2">*本趟次為議價趟次，請收取並輸入議價車資{{order.NegotiatedTaxiFee}}元</p>
+
+      </div>
+      <div class="modal-footer">
+        <div class="row">
+          <div class="col pr-0">
+            <button type="button" class="btn btn-block btn-secondary" (click)="dropModal.hide()">取消</button>
+          </div>
+          <div class="col">
+            <button type="button" class="btn btn-block btn-primary" (click)="checkDist(); dropModal.hide()"
+              [disabled]="order.IsNegotiatedTaxiFee ? (taxiFee !== order.NegotiatedTaxiFee) : (taxiFee == null || taxiFee < 0)">確定</button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+
+
+<div bsModal #detailModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">詳細資訊</h4>
+
+        <button type="button" class="close pull-right" aria-label="Close" (click)="detailModal.hide();">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div *ngIf="order" class="modal-body">
+
+        <app-order-detail [parent]="'mission'" [selectedOrder]="order"></app-order-detail>
+
+      </div>
+
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

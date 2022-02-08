@@ -1,0 +1,157 @@
+<div class="component-container animated fadeIn" (window:resize)="onResize()">
+  <!-- <app-timeline></app-timeline> -->
+
+  <!-- <div class="mt-for-timeline"></div> -->
+  <h1 class="mb-rwd d-none d-lg-block">預約承接</h1>
+  <div class="row align-items-center">
+    <div class="col-xl-4 col-lg-6 col-md-8 col-12 mb-rwd calendar">
+      <p-calendar [(ngModel)]="date" [minDate]="minDateValue" [maxDate]="maxDateValue"
+        [touchUI]="isMobile" [readonlyInput]="true"
+        dateFormat="yy/mm/dd" [placeholder]="'選取日期'"></p-calendar>
+      <button class="btn btn-primary btn-calendar-search" [disabled]="!date || isGetOrderLoading" (click)="availableROrder()">
+        <span *ngIf="isGetOrderLoading" class="spinner-border" role="status" aria-hidden="true"></span>
+        <span *ngIf="!isGetOrderLoading">查詢</span>
+      </button>
+    </div>
+
+    <div class="col mb-rwd">
+      <div class="form-group mb-0">
+        <div class="form-check form-check-inline mr-1">
+          <input class="form-check-input" type="checkbox"  [(ngModel)]="considerPreference" name="considerPreference">
+          <label class="form-check-label" for="considerPreference">啟用偏好規則</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- <div class="row mb-rwd">
+    <div class="col">
+      <span class="info">查詢從今日到{{(date | date: 'yyyy/MM/dd') || '選擇日期'}}之預約</span>
+    </div>
+  </div> -->
+
+  <h2 *ngIf="orderList?.length == 0">查無資料!</h2>
+
+  <div class="order-container">
+    <app-order [parent]="'reservation'" [orderList]="orderList" [p]="p" (pickReservation)="pickOrder($event)"></app-order>
+  </div>
+
+  <div *ngIf="orderList && orderList?.length !== 0" class="pagination">
+    <pagination-controls (pageChange)="pageChanged($event)"
+    previousLabel="" nextLabel=""></pagination-controls>
+    <button *ngIf="orderList && (orderList?.length !== 0) && !isMobile" class="btn btn-primary" [disabled]="pickList.length == 0" (click)="confirmModal.show()">
+      送出<span *ngIf="pickList.length" class="badge badge-danger">{{pickList.length}}</span>
+    </button>
+  </div>
+
+  <button *ngIf="orderList && (orderList?.length !== 0) && (pickList.length != 0) && isMobile" class="btn btn-float" (click)="confirmModal.show()">
+    <i class="fa fa-paper-plane"></i>
+    <span *ngIf="pickList.length" class="badge badge-danger">{{pickList.length}}</span>
+  </button>
+</div>
+
+<p-toast styleClass="custom-toast" position="top-right" key="toast"></p-toast>
+
+<ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true"><p style="color: white" > Loading... </p></ngx-spinner>
+
+
+
+
+
+
+<!-- Button trigger modal -->
+<!-- <button type="button" class="btn btn-primary mr-1" data-toggle="modal" (click)="myModal.show()">
+  Launch demo modal
+</button> -->
+
+
+<div bsModal #confirmModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" [config]="{backdrop: 'static'}">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">確認訊息</h4>
+      </div>
+      <div class="modal-body">
+        <p>確認承接以下任務？</p>
+
+        <p class="label">承接資訊:</p>
+        <div class="card" *ngFor="let order of pickList">
+          <div class="card-header">
+            <span class="badge badge-lg badge-secondary">{{order.DemandObject.class}}</span>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col label">預約時間</div>
+              <div class="col-md col-12 text-truncate">{{order.ReservationTime | date: 'yyyy/MM/dd HH:mm'}}</div>
+            </div>
+
+            <div class="row">
+              <div class="col label">上車地點</div>
+              <div class="col-md col-12 text-truncate">{{order.PUAddress}}</div>
+            </div>
+
+            <div class="row">
+              <div class="col label">下車地點</div>
+              <div class="col-md col-12 text-truncate">{{order.DPAddress}}</div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <div class="row">
+          <div class="col pr-0">
+            <button type="button" class="btn btn-block btn-secondary" (click)="confirmModal.hide()">取消</button>
+          </div>
+          <div class="col">
+            <button type="button" class="btn btn-block btn-primary" (click)="tryTakenROrder();confirmModal.hide()">確定</button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+
+<div bsModal #resultModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" [config]="{backdrop: 'static'}">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">結果訊息</h4>
+      </div>
+      <div class="modal-body">
+        <p class="text-green">{{submitResponse}}</p>
+
+        <p class="label text-green">承接資訊:</p>
+        <div class="card" *ngFor="let order of takenList">
+          <div class="card-header">
+            <span class="badge badge-lg badge-secondary">{{order.DemandObject.class}}</span>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col label">預約時間</div>
+              <div class="col-md col-12 text-truncate">{{order.ReservationTime | date: 'yyyy/MM/dd HH:mm'}}</div>
+            </div>
+
+            <div class="row">
+              <div class="col label">上車地點</div>
+              <div class="col-md col-12 text-truncate">{{order.PUAddress}}</div>
+            </div>
+
+            <div class="row">
+              <div class="col label">下車地點</div>
+              <div class="col-md col-12 text-truncate">{{order.DPAddress}}</div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-block btn-primary" (click)="confirmResult()">確定</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

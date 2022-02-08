@@ -1,0 +1,13 @@
+.modal-table {
+  padding: 16px;
+  border: 1px solid #b9b9b9;
+  border-bottom: none;
+
+  &:nth-child(even) {
+    background-color: #efefef;
+  }
+
+  &:last-child {
+    border-bottom: 1px solid #b9b9b9;
+  }
+}

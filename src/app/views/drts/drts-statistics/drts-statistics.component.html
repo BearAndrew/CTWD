@@ -1,0 +1,145 @@
+<div class="component-container animated fadeIn">
+  <h1>DRTS 班次統計</h1>
+
+  <div class="card">
+    <p-table [responsive]="true" responsiveLayout="stack" styleClass="p-datatable-striped" [autoLayout]="true"
+      [paginator]="true" [rows]="10" [pageLinks]="0" [showJumpToPageDropdown]="true" (onPage)="pageChange()"
+      [value]="dailyAmountList" class="animated fadeIn">
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                <th>日期</th>
+                <th>總額</th>
+                <th>詳細</th>
+                <th></th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-dailyAmount let-columns="columns">
+            <tr>
+                <td><span class="p-column-title">日期</span>{{dailyAmount.date}}</td>
+                <td><span class="p-column-title">總額</span>{{dailyAmount.cash + dailyAmount.easycard + dailyAmount.ipass}}</td>
+                <td><span class="p-column-title">詳細</span>
+                  現金:{{dailyAmount.cash}}
+                  悠遊卡:{{dailyAmount.easycard}}
+                  一卡通:{{dailyAmount.ipass}}
+                </td>
+                <td class="info-table-col">
+                  <button class="btn btn-ghost-dark btn-block d-none d-md-block" (click)="showDetail(dailyAmount)">
+                    <i class="fa fa-lg fa-info-circle"></i>
+                  </button>
+                </td>
+                <button class="btn btn-dark btn-info d-md-none" (click)="showDetail(dailyAmount)">
+                  <i class="fa fa-info-circle"></i>
+                </button>
+            </tr>
+        </ng-template>
+    </p-table>
+  </div>
+</div>
+
+
+<p-toast styleClass="custom-toast" position="top-right" key="toast"></p-toast>
+<ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true"><p style="color: white" > Loading... </p></ngx-spinner>
+
+
+
+
+
+
+
+
+
+
+
+<!-- Button trigger modal -->
+<!-- <button type="button" class="btn btn-secondary mr-1" data-toggle="modal" (click)="detailModal.show()">
+  Launch demo modal
+</button> -->
+
+<div bsModal #detailModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div *ngIf="selectedDailyAmount" class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">詳細資訊</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="detailModal.hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="modal-table" *ngFor="let shiftInfo of selectedDailyAmount.shiftInfoList; let i = index;">
+          <p class="font-weight-bold text-dark">班次({{i + 1}})</p>
+          <div class="row">
+            <div class="col label">發車時間</div>
+            <div class="col-md col-12 text-truncate">{{shiftInfo.departTime}}</div>
+          </div>
+          <div class="row">
+            <div class="col label">路線名稱</div>
+            <div class="col-md col-12 text-truncate">{{shiftInfo.routeName}}</div>
+          </div>
+          <div class="row">
+            <div class="col label">金額</div>
+            <div class="col-md col-12 text-truncate">
+              現金:{{shiftInfo.cash}}
+              悠遊卡:{{shiftInfo.easycard}}
+              一卡通:{{shiftInfo.ipass}}
+            </div>
+          </div>
+          <p-accordion class="mt-2 mb-2">
+            <p-accordionTab header="乘客訂單明細: {{shiftInfo.orderList?.length || 0}}張">
+
+              <div *ngFor="let order of shiftInfo.orderList; let j = index">
+                <p class="font-weight-bold text-dark">
+                  訂單({{j + 1}})：{{order.OrderType}}
+                  <span class="text-danger" *ngIf="order.PickupTime == ''">(未上車)</span>
+                </p>
+
+                <div class="row" *ngIf="order.PickupTime != ''">
+                  <div class="col label">上車時間</div>
+                  <div class="col-md col-12 text-truncate">
+                    {{order.PickupTime}}
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col label">上車站點</div>
+                  <div class="col-md col-12 text-truncate">
+                    {{order.PickupStopName}}
+                  </div>
+                </div>
+                <div class="row" *ngIf="order.DropTime != ''">
+                  <div class="col label">下車時間</div>
+                  <div class="col-md col-12 text-truncate">
+                    {{order.DropTime}}
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col label">下車站點</div>
+                  <div class="col-md col-12 text-truncate">
+                    {{order.DropStopName}}
+                  </div>
+                </div>
+                <div class="row" *ngIf="order.PickupTime != ''">
+                  <div class="col label">付款方式</div>
+                  <div class="col-md col-12 text-truncate">
+                    {{order.PayType}}
+                    <span *ngIf="order.CardType">({{order.CardType}})</span>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col label">金額</div>
+                  <div class="col-md col-12 text-truncate">
+                    {{order.Amount}} 元
+                  </div>
+                </div>
+                <hr>
+              </div>
+
+            </p-accordionTab>
+          </p-accordion>
+        </div>
+
+      </div>
+
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

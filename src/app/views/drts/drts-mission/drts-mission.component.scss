@@ -1,0 +1,147 @@
+@import 'src/scss/variables';
+@import 'src/scss/p-upload';
+@import 'src/scss/card';
+
+:host ::ng-deep {
+  .passengerCount {
+    display: inline-block;
+    width: 100% !important;
+    padding-left: 40px;
+  }
+  .passengerCount .p-button {
+    width: 20%;
+  }
+
+  .p-selectbutton {
+    display: flex;
+    flex-direction: row;
+    // width: 100%
+  }
+  .p-selectbutton .p-button {
+    flex: 1 1 0;
+    padding: 0.5rem;
+  }
+}
+
+.component-container {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+
+.container {
+  flex: 1 1 auto;
+  padding: 0 !important;
+  @media (min-width: $lg) {
+    max-width: 500px;
+  }
+}
+
+.d-n-flex {
+  flex: none;
+}
+
+.btn-bottom {
+  margin: auto;
+  max-width: calc(100vw - 30px);
+  @media (min-width: $lg) {
+    max-width: 500px;
+  }
+}
+
+textarea {
+  height: 150px;
+}
+
+.card-yellow {
+  .card-header {
+    background-color: #fff4d2;
+  }
+  .card-body {
+    background-color: #fffbf0;
+  }
+  .card-footer {
+    background-color: #fff4d2;
+  }
+}
+
+
+.color-block {
+  border-radius: 1rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+
+  &-icon {
+    flex: 0.2 1 0;
+    padding-right: 1rem;
+    align-self: center;
+    text-align: center;
+    font-size: 3rem;
+  }
+
+  &-header {
+    flex: 1 1 0;
+  }
+
+  &-body {
+    span {
+      font-size: 16px;
+      font-weight: bolder;
+    }
+  }
+}
+
+.bg-green {
+  color: white;
+}
+
+.bg-stop {
+  $bgStop: #8F5600;
+  $stopTextColor: white;
+  position: relative;
+  background-color: $bgStop;
+  color: $stopTextColor;
+
+  p {
+    position: relative;
+    padding-left: 2rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    &:not(:only-child):not(:last-child)::before {
+      background: $stopTextColor;
+      content: "";
+      height: 150%;
+      position: absolute;
+      top: 50%;
+      left: 13px;
+      width: 3px;
+    }
+
+    &::after {
+      border: 3px solid $stopTextColor;
+      border-radius: 50%;
+      content: '';
+      display: block;
+      height: 14px;
+      position: absolute;
+      top: 50%;
+      left: 8px;
+      width: 14px;
+      transform: translateY(-25%);
+    }
+
+    &:not(:last-child)::after {
+      background: $bgStop;
+    }
+    &:last-child::after {
+      background: $stopTextColor;
+    }
+  }
+}
+
+.bg-pickup {
+  background-color: #fafafa;
+}

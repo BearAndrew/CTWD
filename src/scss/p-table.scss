@@ -1,0 +1,62 @@
+.p-tabmenu .p-tabmenu-nav .p-tabmenuitem {
+  font-size: 16px;
+
+  @media screen and (max-width: $md) {
+    flex: 1 1 auto;
+  }
+}
+
+.p-datatable {
+  font-size: unset;
+}
+
+.info-table-col {
+  width: 20px;
+}
+
+.p-datatable.p-datatable-striped .p-datatable-tbody > tr:nth-child(even) {
+  background: #ebebeb;
+}
+
+.p-paginator {
+  padding: 0.5rem 0rem;
+}
+
+@media (max-width: $md){
+  .p-datatable .p-datatable-tbody > tr> td:first-child {
+    padding-right: 2.5rem !important;
+  }
+
+  .p-datatable .p-datatable-tbody > tr> td:last-child {
+    padding-bottom: 0.5rem !important;
+  }
+
+  .p-datatable .p-datatable-tbody > tr > td {
+    padding-top: 0.5rem;
+    padding-bottom: 0;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .p-column-title {
+    display: block !important;
+    font-size: 1rem;
+    padding-bottom: 0 !important;
+  }
+
+  .btn-info {
+    position: absolute;
+    right: 0.75rem;
+    top: 0.75rem;
+    padding: 4px !important;
+    line-height: 1;
+  }
+
+  .label {
+    line-height: .5;
+  }
+}
+
+.p-datatable .p-datatable-tbody > tr {
+  position: relative;
+}

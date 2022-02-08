@@ -1,0 +1,27 @@
+@import "variables";
+
+.p-toast {
+  z-index: 5000 !important;
+}
+
+.custom-toast .p-toast-message {
+  // small the toast at mobile
+  @media screen and (max-width: $md){
+    width: 80vw;
+  }
+}
+
+.p-toast-bottom-center {
+  // move to center
+  @media screen and (max-width: $md){
+    transform: translate(-40vw, 0);
+    margin-left: 0;
+  }
+}
+
+.p-toast-top-right {
+  // move to center
+  @media screen and (max-width: $md){
+    left: calc(110vw - 100% );
+  }
+}

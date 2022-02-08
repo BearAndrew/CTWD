@@ -1,0 +1,134 @@
+<app-header
+  [fixed]="true"
+  [navbarBrandFull]="{src: 'assets/img/brand/logo.svg', width: 89, height: 25, alt: 'CoreUI Logo'}"
+  [navbarBrandMinimized]="{src: 'assets/img/brand/sygnet.svg', width: 30, height: 30, alt: 'CoreUI Logo'}"
+  [mobileSidebarToggler]="!managerService.missionMode"
+  [sidebarToggler]="false"
+  [asideMenuToggler]="false"
+  [mobileAsideMenuToggler]="false">
+  <!-- <ul class="nav navbar-nav d-md-down-none">
+    <li class="nav-item px-3">
+      <a class="nav-link" href="#">Dashboard</a>
+    </li>
+    <li class="nav-item px-3">
+      <a class="nav-link" href="#">Users</a>
+    </li>
+    <li class="nav-item px-3">
+      <a class="nav-link" href="#">Settings</a>
+    </li>
+  </ul> -->
+  <span class="text-nav" [ngClass]="{'name' : managerService.missionMode}">{{managerService.userName}}</span>
+
+  <ul class="nav navbar-nav ml-auto">
+    <li class="nav-item pb-2">
+      <span class="nav-btn" (click)="showAsideMenu()"><i class="fa fa-envelope"></i>
+        <span *ngIf="managerService.UnreadMessagesCount>0" class="badge badge-pill badge-danger nav-badge">
+          {{managerService.UnreadMessagesCount}}
+        </span>
+      </span>
+      <span class="nav-btn" (click)="logoutModal.show()"><i class="fa fa-sign-out"></i>登出</span>
+    </li>
+  </ul>
+
+</app-header>
+<div class="app-body">
+  <app-sidebar #appSidebar *ngIf="!managerService.missionMode" [fixed]="true" [display]="'lg'" [minimized]="sidebarMinimized" (minimizedChange)="toggleMinimize($event)">
+    <app-sidebar-nav [navItems]="navItems" [perfectScrollbar] [disabled]="appSidebar.minimized"></app-sidebar-nav>
+    <app-sidebar-minimizer></app-sidebar-minimizer>
+  </app-sidebar>
+  <!-- Main content -->
+  <main class="main">
+    <div class="container-fluid">
+      <router-outlet></router-outlet>
+    </div><!-- /.container-fluid -->
+  </main>
+  <app-aside [fixed]="true" [display]="true">
+    <tabset #messageTabs>
+      <!--管理訊息列表-->
+      <div>
+        <!-- <ng-template tabHeading><i class="icon-speech"></i></ng-template> -->
+        <div class="p-3">
+          <!--訊息載入提示-->
+          <div *ngIf="isMessagesLoading" class="w-100 d-flex justify-content-center">
+            <div class="spinner-border text-dark " role="status">
+              <span class="sr-only">Loading...</span>
+            </div>
+          </div>
+          <!--管理訊息-->
+          <div *ngFor="let message of messages; index as i">
+            <div class="message">
+              <div>
+                <!--置頂標籤-->
+                <i *ngIf="message.Pinned" class="icon-pin icons text-primary font-weight-bolder mr-1"></i>
+                <!--新訊息標籤-->
+                <span *ngIf="message.IsNew" class="badge badge-success mr-1">新</span>
+              </div>
+              <div>
+                <!--分類-->
+                <small class="text-muted">{{message.Category}}</small>
+                <!--時間-->
+                <small class="text-muted float-right mt-1">{{message.DTString}}</small>
+              </div>
+              <div class="font-weight-bold">
+                <!--標題-->
+                {{message.Title}}
+              </div>
+              <!--內文-->
+              <div class="text-body" [innerHTML]="message.Body"></div>
+              <!--處理訊息/開啟連結-->
+              <div *ngIf="message.LinkUrl.length > 0" class="mt-2" style="height:45px;">
+                <button *ngIf="message.LinkUrl.length > 0" class="btn btn-ghost-primary btn-sm float-right"
+                  type="button" (click)="openLink(message)" [pTooltip]="message.LinkUrl"
+                  tooltipPosition="bottom" tooltipZIndex="5030" tooltipStyleClass="text-break">
+                    <i class="fa fa-link"></i>&nbsp;開啟連結
+                </button>
+              </div>
+              <hr class="mt-1">
+            </div>
+          </div>
+
+          <div *ngIf="messages?.length===0">
+            <span>無訊息</span>
+          </div>
+        </div>
+      </div>
+    </tabset>
+  </app-aside>
+</div>
+<app-footer>
+  <span><a href="tel:+886-2-4128333"><i class="fa fa-phone"></i> 客服電話</a></span>
+  <span class="ml-auto"><a href="https://www.crowntaxi.com.tw" target="_blank">皇冠大車隊</a> &copy; 2021 </span>
+</app-footer>
+
+
+
+
+
+<!-- Button trigger modal -->
+<!-- <button type="button" class="btn btn-primary mr-1" data-toggle="modal" (click)="myModal.show()">
+  Launch demo modal
+</button> -->
+
+
+<div bsModal #logoutModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" [config]="{backdrop: 'static'}">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">確認訊息</h4>
+      </div>
+      <div class="modal-body">
+        <p>是否要登出？</p>
+      </div>
+      <div class="modal-footer">
+        <div class="row">
+          <div class="col pr-0">
+            <button type="button" class="btn btn-block btn-secondary" (click)="logoutModal.hide()">取消</button>
+          </div>
+          <div class="col">
+            <button type="button" class="btn btn-block btn-danger" (click)="logout();logoutModal.hide()">登出</button>
+          </div>
+        </div>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

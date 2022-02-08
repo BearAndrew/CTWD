@@ -1,0 +1,47 @@
+<div class="component-container animated fadeIn">
+  <h1 class="mb-rwd">歷史紀錄</h1>
+
+  <h2 *ngIf="orderList?.length == 0">尚無紀錄!</h2>
+
+  <div class="row">
+    <div class="col">
+      <button class="btn btn-primary btn-filter" type="button" (click)="isSearchCollapse = !isSearchCollapse" aria-expanded="false" aria-controls="collapseExample">
+        <i class="fa fa-filter"></i> 篩選
+      </button>
+    </div>
+  </div>
+
+  <div [collapse]="isSearchCollapse">
+    <div class="row mb-2">
+      <div class="col-md-4 mb-2">
+        <input [(ngModel)]="seacrh.puAddress" type="string" class="form-control" placeholder="查詢上車地點" (ngModelChange)="searchChanged()">
+        <span *ngIf="seacrh.puAddress" class="btn bg-transparent btn-clear" (click)="seacrh.puAddress = ''">
+          <i class="times"></i>
+        </span>
+      </div>
+      <div class="col-md-4 mb-2">
+        <input [(ngModel)]="seacrh.dPAddress" type="string" class="form-control" placeholder="查詢下車地點" (ngModelChange)="searchChanged()">
+        <span *ngIf="seacrh.dPAddress" class="btn bg-transparent btn-clear" (click)="seacrh.dPAddress = ''">
+          <i class="times"></i>
+        </span>
+      </div>
+      <div class="col-md-4 mb-2">
+        <p-dropdown [options]="dateList" [(ngModel)]="seacrh.date" optionLabel="value" [showClear]="true"
+           placeholder="查詢月份" autoWidth="false" [style]="{'width':'100%', 'top': '1px'}" (onChange)="searchChanged()"></p-dropdown>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="order-container">
+    <app-order [parent]="'history'" [orderList]="orderList" [search]="seacrh" [p]="p"></app-order>
+  </div>
+
+  <div *ngIf="orderList && orderList?.length !== 0" class="pagination">
+    <pagination-controls (pageChange)="pageChanged($event)"
+    previousLabel="" nextLabel=""></pagination-controls>
+  </div>
+
+</div>
+
+<ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true"><p style="color: white" > Loading... </p></ngx-spinner>

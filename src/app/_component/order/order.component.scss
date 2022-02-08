@@ -1,0 +1,105 @@
+@import "./src/scss/variables";
+
+:host ::ng-deep .p-panel-title{
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #00307e;
+}
+
+:host ::ng-deep .p-panel-content {
+  font-size: 1.5rem;
+}
+
+.border-info {
+  border-color: #12de19 !important;
+  border-width: 3px;
+
+  // 修正 border 增加的2px
+  .card-header {
+    $fixPaddingTop: calc(0.75rem - 2px);
+    $fixPadding: calc(1.25rem - 2px);
+    padding-top: $fixPaddingTop;
+    padding-left: $fixPadding;
+    padding-right: $fixPadding;
+  }
+
+  .card-body {
+    $fixPadding: calc(1.25rem - 2px);
+    padding-left: $fixPadding;
+    padding-right: $fixPadding;
+    padding-bottom: $fixPadding;
+  }
+}
+
+.hover {
+  cursor: pointer;
+}
+
+.badge {
+  margin-right: 10px;
+}
+
+.card-footer {
+  .btn {
+    line-height: 1;
+  }
+  .rest-time-text {
+    line-height: 38px;
+  }
+
+  .btn-execute {
+    -ms-flex: 0 0 90px;
+    flex: 0 0 90px;
+    font-weight: bold;
+    color: rgb(0, 48, 126);
+
+    @media (max-width: $md){
+      font-size: 1rem;
+    }
+  }
+}
+
+@media (max-width: $md){
+  $mobilePadding: .75rem;
+
+  .card {
+    margin-bottom: $mobilePadding;
+
+    * {
+      line-height: 1;
+    }
+    .card-header {
+      padding: $mobilePadding;
+
+      .span-click {
+        line-height: 1.5;
+      }
+    }
+    .card-body {
+      padding: $mobilePadding;
+    }
+    .card-footer {
+      padding: $mobilePadding;
+    }
+
+    .text-truncate {
+      margin-bottom: 0.75rem;
+    }
+  }
+
+  .border-info {
+    // 修正 border 增加的2px
+    $fixPadding: calc(#{$mobilePadding} - 2px);
+    .card-header {
+      padding-top: $fixPadding;
+      padding-left: $fixPadding;
+      padding-right: $fixPadding;
+    }
+
+    .card-body {
+      padding-left: $fixPadding;
+      padding-right: $fixPadding;
+      padding-bottom: $fixPadding;
+    }
+  }
+}

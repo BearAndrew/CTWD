@@ -1,0 +1,56 @@
+// upload
+:host ::ng-deep {
+  .p-fileupload-row {
+    flex-wrap: wrap;
+  }
+
+  @media screen and (min-width: $md) {
+    .p-fileupload-row > div {
+      padding: 16px;
+
+      &:nth-child(1) {
+        width: 100px; // 132px
+        img {
+          width: 100px;
+        }
+      }
+      &:nth-child(2) {
+        width: calc(70% - 102px);
+        text-align: center;
+      }
+      &:nth-child(3) {
+        width: calc(30% - 102px);
+        text-align: center;
+      }
+      &:nth-child(4) {
+        width: 40px; // 72px
+      }
+    }
+  }
+
+  @media screen and (max-width: $md) {
+    .p-fileupload-row {
+      padding-bottom: 16px;
+    }
+
+    .p-fileupload-row > div {
+      padding: 0;
+
+      &:nth-child(1) {
+        width: 50px;
+      }
+      &:nth-child(2) {
+        padding: 0 5px;
+        width: calc(100% - 90px);
+        text-align: center;
+      }
+      &:nth-child(3) {
+        display: none;
+      }
+      &:nth-child(4) {
+        width: 40px;
+        height: 40px;
+      }
+    }
+  }
+}

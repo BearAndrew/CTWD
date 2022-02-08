@@ -1,0 +1,14 @@
+.modal-table {
+  padding: 16px;
+  border: 1px solid #b9b9b9;
+  border-bottom: none;
+}
+
+.modal-table:nth-child(even) {
+  background-color: #efefef;
+}
+
+.modal-table:last-child {
+  border-bottom: 1px solid #b9b9b9;
+}
+/*# sourceMappingURL=modal.css.map */

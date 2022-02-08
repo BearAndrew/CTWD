@@ -1,0 +1,76 @@
+<div class="component-container animated fadeIn">
+  <h1>DRTS 公告</h1>
+
+  <div *ngIf="bulletinList?.length > 0" class="order-container" (window:resize)="onResize()">
+    <div class="row">
+      <div *ngFor="let bulletin of bulletinList | paginate: { itemsPerPage: itemsPerPage, currentPage: p }"
+        class="col-md-6 col-xl-4">
+
+        <div class="card">
+          <div class="card-body">
+            <p>
+              <span class="badge badge-lg badge-secondary">{{bulletin.Category}}</span>
+              <span>{{bulletin.Title}}</span>
+            </p>
+            <hr>
+            <p>{{bulletin.Content}}</p>
+          </div>
+
+          <div class="card-footer">
+            <span>{{bulletin.CreateTime}}</span>
+            <div class="float-right">
+              <button class="btn btn-ghost-dark btn-sm d-none d-md-inline" (click)="loadDDRTSPhoto(bulletin.ID)">
+                <i class="fa fa-lg fa-photo"></i>
+              </button>
+              <button class="btn btn-dark btn-sm d-md-none btn-float-info" (click)="loadDDRTSPhoto(bulletin.ID)">
+                <i class="fa fa-photo"></i>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div><!--/.col-->
+    </div><!--/.row-->
+  </div>
+
+  <div *ngIf="bulletinList && bulletinList?.length !== 0" class="pagination">
+    <pagination-controls (pageChange)="pageChanged($event)"
+    previousLabel="" nextLabel=""></pagination-controls>
+  </div>
+</div>
+
+
+<p-toast styleClass="custom-toast" position="top-right" key="toast"></p-toast>
+<ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true"><p style="color: white" > Loading... </p></ngx-spinner>
+
+
+
+
+
+
+
+
+
+
+<div bsModal #photoModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" [config]="{backdrop: 'static',  keyboard: false}">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div *ngIf="showPhotoList" class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">檢視照片 共{{showPhotoList.length}}張</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="photoModal.hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p-carousel [value]="showPhotoList" [numVisible]="1" [numScroll]="1">
+          <ng-template let-showPhoto pTemplate="item">
+            <img src="data:image/png;base64,{{showPhoto}}"/>
+          </ng-template>
+        </p-carousel>
+      </div>
+
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

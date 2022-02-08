@@ -1,0 +1,20 @@
+.p-accordion {
+  font-size: unset;
+  margin-bottom: 1rem;
+}
+
+.p-accordion .p-accordion-header:not(.p-disabled) .p-accordion-header-link:focus {
+  -webkit-box-shadow: none;
+          box-shadow: none;
+}
+
+.p-accordion .p-accordion-header:not(.p-highlight):not(.p-disabled):hover .p-accordion-header-link {
+  background: #f8f9fa;
+  border-color: #dee2e6;
+}
+
+.p-accordion-content {
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+/*# sourceMappingURL=p-accordion.css.map */

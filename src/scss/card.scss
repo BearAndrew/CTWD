@@ -1,0 +1,18 @@
+@media (max-width: $md){
+  $mobilePadding: .75rem;
+
+  .card {
+    margin-bottom: $mobilePadding;
+    .card-header {
+      padding: $mobilePadding;
+    }
+    .card-body {
+      line-height: 1.2;
+      padding: $mobilePadding;
+    }
+
+    .text-truncate {
+      margin-bottom: 0.75rem;
+    }
+  }
+}

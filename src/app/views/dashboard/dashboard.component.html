@@ -1,0 +1,28 @@
+<div class="component-container animated fadeIn">
+
+  <div class="relative mb-rwd">
+    <h1>主控台</h1>
+    <button class="btn btn-primary btn-refresh" (click)="refresh()">刷新</button>
+  </div>
+
+  <div *ngIf="orderList?.length == 0">
+    <h2>尚無任務!!</h2>
+    <button class="btn btn-primary" [routerLink]="'/reservation'" [replaceUrl]="true">
+      <i class="fa fa-taxi"></i> 去接案
+    </button>
+  </div>
+
+  <div class="order-container">
+    <app-order [parent]="'dashboard'" [orderList]="orderList" [p]="p" (execute)="executeOrder($event)"></app-order>
+  </div>
+
+  <div *ngIf="orderList && orderList?.length !== 0" class="pagination">
+    <pagination-controls (pageChange)="pageChanged($event)"
+    previousLabel="" nextLabel=""></pagination-controls>
+  </div>
+
+</div>
+
+<p-toast styleClass="custom-toast" position="top-right" key="toast"></p-toast>
+
+<ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="medium" color="#fff" type="square-jelly-box" [fullScreen]="true"><p style="color: white" > Loading... </p></ngx-spinner>
